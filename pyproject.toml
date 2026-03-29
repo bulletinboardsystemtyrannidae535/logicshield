@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "logicshield"
+version = "1.0.0"
+description = "Deterministic validation firewall for LLM outputs. Verify AI proposals against ground-truth state using deterministic rules. Zero dependencies."
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.8"
+authors = [{name = "Mattijs Moens"}]
+keywords = [
+    "ai-safety", "llm-validation", "deterministic-verification",
+    "truth-sandwich", "hallucination-detection", "logic-shield",
+    "ai-firewall", "healthcare-ai", "safety-critical",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Security",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+[project.urls]
+Homepage = "https://github.com/mattijsmoens/LogicShield"
+Repository = "https://github.com/mattijsmoens/LogicShield"
+
+[tool.setuptools.packages.find]
+include = ["logicshield*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
